@@ -8,9 +8,11 @@ collection = db['cardapio']
 
 selected_collection = db['pedidos']
 
+total_pedidos = selected_collection.count_documents({})
+
 pratos_selecionados = {}
 st.title("Cardápio")
-pratos_info = list(collection.find({}, {"_id": 0, "name": 1, "description": 1, "price": 1}))
+pratos_info = list(collection.find())
 for prato_info in pratos_info:
     nome_prato = prato_info["name"]
     quantidade_sel = st.number_input(f"{nome_prato}", min_value=0, value=0)
@@ -32,6 +34,7 @@ if st.button('Adcionar pedido'):
         nomes.append(nome)
         quantidades.append(quantidade)
     data = {
+        "id": total_pedidos + 1,
         "nome": nomes,
         "quantidade": quantidades,
         "status": "Em preparo"
