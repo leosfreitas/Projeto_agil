@@ -15,7 +15,7 @@ st.title("Cardápio")
 pratos_info = list(collection.find())
 for prato_info in pratos_info:
     nome_prato = prato_info["name"]
-    quantidade_sel = st.number_input(f"{nome_prato}", min_value=0, value=0)
+    quantidade_sel = st.number_input(f"{nome_prato}", min_value=0, max_value=4, value=0)
     if quantidade_sel > 0:
         pratos_selecionados[nome_prato] = {
             "quantidade": quantidade_sel,
