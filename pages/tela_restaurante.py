@@ -16,12 +16,18 @@ pedidos = collection.find()
 with tab1:
     for pedido in pedidos:
         if pedido['status'] == 'Em preparo':
-            st.markdown('- ' + pedido['nome'])
+            st.write(pedido['id'])
+            for i in range(len(pedido['nome'])):
+                st.markdown('- ' + pedido['nome'][i])
+                st.markdown('- ' + 'Quantidade: ' + str(pedido['quantidade'][i]))
             st.markdown('- ' + pedido['status'])
             if st.button('**Pronto**', key=pedido['_id']):
                 collection.update_one({"_id": pedido['_id']}, {"$set": {'status': 'Pronto'}})
         elif pedido['status'] == 'Pronto':
-            st.markdown('- ' + pedido['nome'])
+            st.write(pedido['id'])
+            for i in range(len(pedido['nome'])):
+                st.markdown('- ' + pedido['nome'][i])
+                st.markdown('- ' + 'Quantidade: ' + str(pedido['quantidade'][i]))
             st.markdown('- ' + pedido['status'])
             if st.button('**Retirado**', key=pedido['_id']):
                 collection.update_one({"_id": pedido['_id']}, {"$set": {'status': 'Retirado'}})
@@ -31,7 +37,10 @@ pedidos = collection.find()
 with tab2:
     for pedido in pedidos:
         if pedido['status'] == 'Retirado':
-            st.markdown('- ' + pedido['nome'])
+            st.write(pedido['id'])
+            for i in range(len(pedido['nome'])):
+                st.markdown('- ' + pedido['nome'][i])
+                st.markdown('- ' + 'Quantidade: ' + str(pedido['quantidade'][i]))
             st.markdown('- ' + pedido['status'])
             if st.button('**Deletar**', key=pedido['_id']):
                 collection.delete_one({"_id": pedido['_id']})
