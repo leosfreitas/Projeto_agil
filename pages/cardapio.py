@@ -1,6 +1,5 @@
-import streamlit as st 
-import pandas as pd
-import pymongo 
+import streamlit as st
+import pymongo
 
 mongo_url = "mongodb+srv://admin:admin@projetoagil.3bq3al9.mongodb.net/"
 client = pymongo.MongoClient(mongo_url)
@@ -9,34 +8,35 @@ collection = db['cardapio']
 
 selected_collection = db['pedidos']
 
-st.sidebar.title('Resumo do Pedido')
-
-st.title('Cardápio')
-st.subheader('Itens disponíveis:')
-
-itens = collection.find()
-
-itens_selecionados = []
-for item in itens:
-    item_selected = st.checkbox(f"**Nome:** {item['name']}")
-    st.write(f"**Descrição:** {item['description']}")
-    if item_selected:
-        itens_selecionados.append(item)
-
-for item in itens_selecionados:
-    st.sidebar.write(item['name'])
-
-if st.sidebar.button('Adicionar pedido'):
-    for item in itens_selecionados:
-
-        data = {
-            "nome": item['name'],
-            "status": "Em preparo" 
+pratos_selecionados = {}
+st.title("Cardápio")
+pratos_info = list(collection.find({}, {"_id": 0, "name": 1, "description": 1, "price": 1}))
+for prato_info in pratos_info:
+    nome_prato = prato_info["name"]
+    quantidade_sel = st.number_input(f"{nome_prato}", min_value=0, value=0)
+    if quantidade_sel > 0:
+        pratos_selecionados[nome_prato] = {
+            "quantidade": quantidade_sel,
         }
 
-        id_pedido = selected_collection.insert_one(data)
+st.title('Resumo do pedido')
+for nome, dados in pratos_selecionados.items():
+    quantidade = dados["quantidade"]
+    st.write(f"**{nome}:** {quantidade}")
 
-    itens_selecionados.clear()
-
+if st.button('Adcionar pedido'):
+    nomes = []
+    quantidades = []
+    for nome, dados in pratos_selecionados.items():
+        quantidade = dados['quantidade']
+        nomes.append(nome)
+        quantidades.append(quantidade)
+    data = {
+        "nome": nomes,
+        "quantidade": quantidades,
+        "status": "Em preparo"
+    }
+    pedido_id = selected_collection.insert_one(data)
+    st.write("Pedido adicionado com sucesso")
 
 client.close()
