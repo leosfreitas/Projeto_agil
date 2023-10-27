@@ -1,17 +1,15 @@
 import streamlit as st 
 import pandas as pd
 import pymongo 
+import requests
 
-mongo_url = "mongodb+srv://admin:admin@projetoagil.3bq3al9.mongodb.net/"
-client = pymongo.MongoClient(mongo_url)
-db = client["App"]
-collection = db['pedidos']
+BASE_URL = 'http://localhost:5000/'
 
 st.header('Pedidos:')
 
 tab1, tab2 = st.tabs(["Pedidos", "Historico"])
 
-pedidos = collection.find()
+pedidos = requests.get(f'{BASE_URL}pedidos').json()['pedidos']
 
 with tab1:
     for pedido in pedidos:
@@ -22,7 +20,7 @@ with tab1:
                 st.markdown('- ' + 'Quantidade: ' + str(pedido['quantidade'][i]))
             st.markdown('- ' + pedido['status'])
             if st.button('**Pronto**', key=pedido['_id']):
-                collection.update_one({"_id": pedido['_id']}, {"$set": {'status': 'Pronto'}})
+                atualizar_pedido = requests.put(f'{BASE_URL}restaurante/pedidos', json={"_id": pedido['_id'], 'status': 'Pronto'})
         elif pedido['status'] == 'Pronto':
             st.write(pedido['id'])
             for i in range(len(pedido['nome'])):
@@ -30,9 +28,9 @@ with tab1:
                 st.markdown('- ' + 'Quantidade: ' + str(pedido['quantidade'][i]))
             st.markdown('- ' + pedido['status'])
             if st.button('**Retirado**', key=pedido['_id']):
-                collection.update_one({"_id": pedido['_id']}, {"$set": {'status': 'Retirado'}})
+                atualizar_pedido = requests.put(f'{BASE_URL}restaurante/pedidos', json={"_id": pedido['_id'], 'status': 'Retirado'})
 
-pedidos = collection.find()
+pedidos = requests.get(f'{BASE_URL}pedidos').json()['pedidos']
 
 with tab2:
     for pedido in pedidos:
@@ -43,4 +41,4 @@ with tab2:
                 st.markdown('- ' + 'Quantidade: ' + str(pedido['quantidade'][i]))
             st.markdown('- ' + pedido['status'])
             if st.button('**Deletar**', key=pedido['_id']):
-                collection.delete_one({"_id": pedido['_id']})
+                deletar_pedido = requests.delete(f'{BASE_URL}restaurante/pedidos', json={"_id": pedido['_id']})
