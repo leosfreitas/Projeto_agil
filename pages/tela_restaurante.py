@@ -3,13 +3,13 @@ import pandas as pd
 import pymongo 
 import requests
 
-BASE_URL = 'http://localhost:5000/'
+BASE_URL = 'http://127.0.0.1:5000/'
 
 st.header('Pedidos:')
 
 tab1, tab2 = st.tabs(["Pedidos", "Historico"])
 
-pedidos = requests.get(f'{BASE_URL}pedidos').json()['pedidos']
+pedidos = requests.get(f'{BASE_URL}pedidos').json()["pedidos"]
 
 with tab1:
     for pedido in pedidos:

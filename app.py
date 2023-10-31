@@ -47,7 +47,7 @@ def inserir_pedido():
 def update_pedido():
     try:
         data = request.json
-        pedidos_collection.update_one({"_id": data['_id']}, {"$set": {'status': data['status']}})
+        pedidos_collection.update_one({"_id": ObjectId(data['_id'])}, {"$set": {"status": data['status']}})
         return {'Mensagem': 'Pedido atualizado com sucesso!'}, 200
     except Exception as e:
         return {"erro":str(e)}, 500    
@@ -56,7 +56,7 @@ def update_pedido():
 def delete_pedido():
     try:
         data = request.json
-        pedidos_collection.delete_one({"_id": data['_id']})
+        pedidos_collection.delete_one({"_id": ObjectId(data['_id'])})
         return {'Mensagem': 'Pedido deletado com sucesso!'}, 200
     except Exception as e:
         return {"erro":str(e)}, 500
