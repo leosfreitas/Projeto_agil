@@ -26,6 +26,6 @@ if st.button('Adcionar pedido'):
         quantidade = dados['quantidade']
         nomes.append(nome)
         quantidades.append(quantidade)
-    inserir_prato = requests.post('http://localhost:5000/pedidos', json={"id": 0, "nome": nomes, "quantidade": quantidades, "status": "Em preparo"})
+    inserir_prato = requests.post('http://localhost:5000/pedidos', json={"nome": nomes, "quantidade": quantidades, "status": "Em preparo"})
     st.write("Pedido adicionado com sucesso")
     pratos_selecionados.clear()

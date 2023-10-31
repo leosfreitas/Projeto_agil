@@ -9,6 +9,16 @@ db = client["App"]
 collection = db['cardapio']
 
 pedidos_collection = db['pedidos']
+contador_collection = db['contador']
+contador_collection.insert_one({'id': 'pedido_id', 'sequence_value': 0})
+
+def get_next_pedido_id():
+    sequence_doc = contador_collection.find_one_and_update(
+        {'_id': 'pedido_id'},
+        {'$inc': {'sequence_value': 1}},
+        return_document=True
+    )
+    return sequence_doc['sequence_value']
 
 @app.route('/cardapio', methods=['GET'])
 def get_cardapio():
@@ -26,13 +36,14 @@ def get_cardapio():
 def inserir_pedido():
     try:
         data = request.json
+        data['id'] = get_next_pedido_id()
         id_pedido = pedidos_collection.insert_one(data)
         print(id_pedido.inserted_id)
         return {"_id": str(id_pedido.inserted_id)}, 201
     except Exception as e:
         return {"erro":str(e)}, 500    
 
-@app.route('/restaurante/pedidos', methods=['POST'])
+@app.route('/restaurante/pedidos', methods=['PUT'])
 def update_pedido():
     try:
         data = request.json
@@ -41,7 +52,7 @@ def update_pedido():
     except Exception as e:
         return {"erro":str(e)}, 500    
 
-@app.route('restaurante/pedidos', methods=['DELETE'])
+@app.route('/restaurante/pedidos', methods=['DELETE'])
 def delete_pedido():
     try:
         data = request.json
