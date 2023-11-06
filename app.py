@@ -38,8 +38,8 @@ def add_cardapio():
         data = request.json
         if not all (dado in data for dado in ("name","description","price")):
             return jsonify({"erro":"Requisição inválida"}), 400
-        for dado in data:
-            if dado in (None,""):
+        for dado in data.values():
+            if dado in (None,''):
                 return jsonify({"erro":"Requisição inválida"}), 400
         filter_ = {}
         projection_ = {}
@@ -52,12 +52,13 @@ def add_cardapio():
     except Exception as e:
         return {"erro":str(e)}, 500
 
-@app.route('/cardapio/<prato_id>', methods=['DELETE'])
-def delete_cardapio(prato_id):
+@app.route('/cardapio/', methods=['DELETE'])
+def delete_cardapio():
+    print('entrou')
     try:
-        nome = collection.find_one({"_id": ObjectId(id)},{'_id': 0, 'name': 1})
-        collection.delete_one({"_id": ObjectId(id)})
-        return jsonify({"message": f"{nome.capitalize()} deletado com sucesso."}), 200
+        data = request.json
+        collection.delete_one({"_id": ObjectId(data['_id'])})
+        return jsonify({'Mensagem': 'Prato deletado com sucesso!'}), 200
     except Exception as e:
         return {"erro":str(e)}, 500
      
