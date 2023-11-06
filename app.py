@@ -43,6 +43,19 @@ def inserir_pedido():
     except Exception as e:
         return {"erro":str(e)}, 500    
 
+
+@app.route('/pedidos/<pedido_id>', methods=['GET'])
+def buscar_pedido_por_id(pedido_id):
+    try:
+        id_pedido =  ObjectId(pedido_id)
+        pedido = pedidos_collection.find_one({"_id": id_pedido},{'_id': 0} )
+        if pedido:
+            return jsonify({"pedido": pedido}), 200
+        else:
+            return jsonify({"message": "Pedido não encontrado."}), 404
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
+
 @app.route('/restaurante/pedidos', methods=['PUT'])
 def update_pedido():
     try:
