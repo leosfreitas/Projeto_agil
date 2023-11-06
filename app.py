@@ -31,7 +31,36 @@ def get_cardapio():
         return {"cardapio": cardapio}, 200
     except Exception as e:
         return {"erro":str(e)}, 500
-        
+    
+@app.route('/cardapio', methods=['POST'])
+def add_cardapio():
+    try:
+        data = request.json
+        if not all (dado in data for dado in ("name","description","price")):
+            return jsonify({"erro":"Requisição inválida"}), 400
+        for dado in data:
+            if dado in (None,""):
+                return jsonify({"erro":"Requisição inválida"}), 400
+        filter_ = {}
+        projection_ = {}
+        pratos = list(collection.find(filter_, projection_))
+        for prato in pratos:
+            if prato["name"] == data["name"]:
+                return jsonify({"erro":"Prato já cadastrado"}), 400
+        prato_id = collection.insert_one(data)
+        return {"_id": str(prato_id.inserted_id)}, 201
+    except Exception as e:
+        return {"erro":str(e)}, 500
+
+@app.route('/cardapio/<prato_id>', methods=['DELETE'])
+def delete_cardapio(prato_id):
+    try:
+        nome = collection.find_one({"_id": ObjectId(id)},{'_id': 0, 'name': 1})
+        collection.delete_one({"_id": ObjectId(id)})
+        return jsonify({"message": f"{nome.capitalize()} deletado com sucesso."}), 200
+    except Exception as e:
+        return {"erro":str(e)}, 500
+     
 @app.route('/pedidos', methods=['POST'])
 def inserir_pedido():
     try:
