@@ -1,11 +1,12 @@
 from flask import Flask, request, jsonify
 from flask_pymongo import PyMongo, ObjectId
 import pymongo
+from credentials_file import credenciais, settings
 
 app = Flask(__name__)
-mongo_url = "mongodb+srv://admin:admin@projetoagil.3bq3al9.mongodb.net/"
+mongo_url = f"mongodb+srv://{credenciais['user_mongo']}:{credenciais['password_mongo']}@{settings['host']}/"
 client = pymongo.MongoClient(mongo_url)
-db = client["App"]
+db = client[f"{settings['database']}"]
 collection = db['cardapio']
 
 pedidos_collection = db['pedidos']
@@ -31,7 +32,37 @@ def get_cardapio():
         return {"cardapio": cardapio}, 200
     except Exception as e:
         return {"erro":str(e)}, 500
-        
+    
+@app.route('/cardapio', methods=['POST'])
+def add_cardapio():
+    try:
+        data = request.json
+        if not all (dado in data for dado in ("name","description","price")):
+            return jsonify({"erro":"Requisição inválida"}), 400
+        for dado in data.values():
+            if dado in (None,''):
+                return jsonify({"erro":"Requisição inválida"}), 400
+        filter_ = {}
+        projection_ = {}
+        pratos = list(collection.find(filter_, projection_))
+        for prato in pratos:
+            if prato["name"] == data["name"]:
+                return jsonify({"erro":"Prato já cadastrado"}), 400
+        prato_id = collection.insert_one(data)
+        return {"_id": str(prato_id.inserted_id)}, 201
+    except Exception as e:
+        return {"erro":str(e)}, 500
+
+@app.route('/cardapio/', methods=['DELETE'])
+def delete_cardapio():
+    print('entrou')
+    try:
+        data = request.json
+        collection.delete_one({"_id": ObjectId(data['_id'])})
+        return jsonify({'Mensagem': 'Prato deletado com sucesso!'}), 200
+    except Exception as e:
+        return {"erro":str(e)}, 500
+     
 @app.route('/pedidos', methods=['POST'])
 def inserir_pedido():
     try:
@@ -42,6 +73,19 @@ def inserir_pedido():
         return {"_id": str(id_pedido.inserted_id)}, 201
     except Exception as e:
         return {"erro":str(e)}, 500    
+
+
+@app.route('/pedidos/<pedido_id>', methods=['GET'])
+def buscar_pedido_por_id(pedido_id):
+    try:
+        id_pedido =  ObjectId(pedido_id)
+        pedido = pedidos_collection.find_one({"_id": id_pedido},{'_id': 0} )
+        if pedido:
+            return jsonify({"pedido": pedido}), 200
+        else:
+            return jsonify({"message": "Pedido não encontrado."}), 404
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
 
 @app.route('/restaurante/pedidos', methods=['PUT'])
 def update_pedido():
