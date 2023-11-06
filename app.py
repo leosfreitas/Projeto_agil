@@ -1,11 +1,12 @@
 from flask import Flask, request, jsonify
 from flask_pymongo import PyMongo, ObjectId
 import pymongo
+from credentials_file import credenciais, settings
 
 app = Flask(__name__)
-mongo_url = "mongodb+srv://admin:admin@projetoagil.3bq3al9.mongodb.net/"
+mongo_url = f"mongodb+srv://{credenciais['user_mongo']}:{credenciais['password_mongo']}@{settings['host']}/"
 client = pymongo.MongoClient(mongo_url)
-db = client["App"]
+db = client[f"{settings['database']}"]
 collection = db['cardapio']
 
 pedidos_collection = db['pedidos']
